@@ -1,0 +1,1 @@
+print('zerosec #1')
