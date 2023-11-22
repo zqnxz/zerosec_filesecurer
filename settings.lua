@@ -1,7 +1,7 @@
 ZeroSec = {
   Files = {{
-    ['Name'] = 'zerosec_obfuscate',
-    ['Paths'] = {'server/affe.lua'}, -- files to obfuscate
+    ['Name'] = 'zerosec_filesecurer',
+    ['Paths'] = {'server/test.lua', 'server/affen.lua'}, -- files to obfuscate
 
     Parameters = {
       ['Body'] = {

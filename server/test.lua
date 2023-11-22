@@ -1,1 +1,1 @@
-print('zerosec #1')
+print('ja')

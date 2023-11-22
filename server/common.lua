@@ -25,6 +25,7 @@ end
 -- @url string
 -- @token any
 function Common:makeRequest(url, token)
+
   for k, v in pairs(ZeroSec.Files) do
     local doesResourceExist = Common:doesResourceExist(v.Name);
 
@@ -32,41 +33,45 @@ function Common:makeRequest(url, token)
       return Handler:print('error', 'Resource not found');
     end
 
-    local content, file_path = Handler:requestFile();
+    local files = Handler:requestFile();
 
-    local success, error = pcall(function()
-      PerformHttpRequest(url, function(error, result, headers)
-        local status, response = pcall(json.decode, result);
-        local state = rawequal(status, true) or rawequal(response, true) or rawequal(response.script, true);
+    Handler:print('debug', 'Obfuscating script/s...');
 
-        if not state then
-          return Handler:print('error', 'Invalid Script Code');
-        end
+    for i, s in pairs(files) do
+      local success, error = pcall(function()
+        Wait(2 * 1000)
+        PerformHttpRequest(url, function(error, result, headers)
+          local status, response = pcall(json.decode, result);
+          local state = rawequal(status, true) or rawequal(response, true) or rawequal(response.script, true);
 
-        Handler:print('debug', 'Obfuscating script/s...');
-        Wait(2 * 1000);
+          if not state then
+            return Handler:print('error', 'Invalid Script Code');
+          end
 
-        local scriptContent = response.script;
-        local serverFilePath = file_path;
-        local serverFile = io.open(serverFilePath, 'w');
+          Wait(2 * 1000);
 
-        serverFile:write(scriptContent);
-        serverFile:close();
+          local scriptContent = response.script;
+          local serverFilePath = s.path;
+          local serverFile = io.open(serverFilePath, 'w');
 
-        Handler:print('success', 'Successfully obfuscated script/s');
-      end, 'POST', json.encode({
-        script = content,
-        platformLock = v.Parameters.Body.platformLock,
-        antiTamper = v.Parameters.Body.antiTamper,
-        encryptStrings = v.Parameters.Body.encryptStrings,
-        maxSecurity = v.Parameters.Body.maxSecurity,
-        constantEncryption = v.Parameters.Body.constantEncryption,
-        giveBackURL = v.Parameters.Body.giveBackURL
-      }), {
-        ['Content-Type'] = 'application/json',
-        ['Authorization'] = token
-      });
-    end);
+          serverFile:write(scriptContent);
+          serverFile:close();
+
+          Handler:print('success', 'Successfully obfuscated script/s');
+        end, 'POST', json.encode({
+          script = s.content,
+          platformLock = v.Parameters.Body.platformLock,
+          antiTamper = v.Parameters.Body.antiTamper,
+          encryptStrings = v.Parameters.Body.encryptStrings,
+          maxSecurity = v.Parameters.Body.maxSecurity,
+          constantEncryption = v.Parameters.Body.constantEncryption,
+          giveBackURL = v.Parameters.Body.giveBackURL
+        }), {
+          ['Content-Type'] = 'application/json',
+          ['Authorization'] = token
+        });
+      end);
+    end
   end
 end
 
